@@ -9,7 +9,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import vn.hoidanit.jobhunter.domain.Company;
-import vn.hoidanit.jobhunter.domain.User;
 import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
 import vn.hoidanit.jobhunter.repository.CompanyRepository;
 
@@ -27,20 +26,19 @@ public class CompanyService {
     }
 
     public ResultPaginationDTO handleGetCompany(Specification<Company> spec, Pageable pageable) {
+        Page<Company> pCompany = this.companyRepository.findAll(spec, pageable);
+        ResultPaginationDTO rs = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
 
-        Page<Company> pageCompany = this.companyRepository.findAll(spec, pageable);
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
 
-        ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
-        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        mt.setPages(pCompany.getTotalPages());
+        mt.setTotal(pCompany.getTotalElements());
 
-        meta.setPage(pageable.getPageNumber() + 1);
-        meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pageCompany.getTotalPages());
-        meta.setTotal(pageCompany.getTotalElements());
-
-        resultPaginationDTO.setMeta(meta);
-        resultPaginationDTO.setResult(pageCompany.getContent());
-        return resultPaginationDTO;
+        rs.setMeta(mt);
+        rs.setResult(pCompany.getContent());
+        return rs;
     }
 
     public Company handleUpdateCompany(Company c) {

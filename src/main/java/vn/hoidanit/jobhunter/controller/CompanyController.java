@@ -1,6 +1,5 @@
 package vn.hoidanit.jobhunter.controller;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.turkraft.springfilter.boot.Filter;
@@ -24,7 +22,7 @@ import jakarta.validation.Valid;
 import vn.hoidanit.jobhunter.domain.Company;
 import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
 import vn.hoidanit.jobhunter.service.CompanyService;
-import vn.hoidanit.jobhunter.util.annotation.APIMessage;
+import vn.hoidanit.jobhunter.util.annotation.ApiMessage;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -42,11 +40,11 @@ public class CompanyController {
     }
 
     @GetMapping("/companies")
-    @APIMessage("fecth all companies")
+    @ApiMessage("Fetch companies")
     public ResponseEntity<ResultPaginationDTO> getCompany(
             @Filter Specification<Company> spec, Pageable pageable) {
 
-        return ResponseEntity.status(HttpStatus.OK).body(this.companyService.handleGetCompany(spec, pageable));
+        return ResponseEntity.ok(this.companyService.handleGetCompany(spec, pageable));
     }
 
     @PutMapping("/companies")

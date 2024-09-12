@@ -43,16 +43,18 @@ public class UserService {
 
     public ResultPaginationDTO fetchAllUser(Specification<User> spec, Pageable pageable) {
         Page<User> pageUser = this.userRepository.findAll(spec, pageable);
+        ResultPaginationDTO rs = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
 
-        ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
-        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
 
-        meta.setPage(pageable.getPageNumber() + 1);
-        meta.setPageSize(pageable.getPageSize());
-        meta.setPages(pageUser.getTotalPages());
-        meta.setTotal(pageUser.getTotalElements());
+        mt.setPages(pageUser.getTotalPages());
+        mt.setTotal(pageUser.getTotalElements());
 
-        resultPaginationDTO.setMeta(meta);
+        rs.setMeta(mt);
+
+        // remove sensitive data
         List<ResUserDTO> listUser = pageUser.getContent()
                 .stream().map(item -> new ResUserDTO(
                         item.getId(),
@@ -65,8 +67,9 @@ public class UserService {
                         item.getCreatedAt()))
                 .collect(Collectors.toList());
 
-        resultPaginationDTO.setResult(listUser);
-        return resultPaginationDTO;
+        rs.setResult(listUser);
+
+        return rs;
     }
 
     public User handleUpdateUser(User reqUser) {
@@ -87,20 +90,20 @@ public class UserService {
         return this.userRepository.findByEmail(username);
     }
 
-    public boolean isUserExist(String email) {
+    public boolean isEmailExist(String email) {
         return this.userRepository.existsByEmail(email);
     }
 
     public ResCreateUserDTO convertToResCreateUserDTO(User user) {
-        ResCreateUserDTO resCreateUserDTO = new ResCreateUserDTO();
-        resCreateUserDTO.setId(user.getId());
-        resCreateUserDTO.setName(user.getName());
-        resCreateUserDTO.setAge(user.getAge());
-        resCreateUserDTO.setEmail(user.getEmail());
-        resCreateUserDTO.setCreatedAt(user.getCreatedAt());
-        resCreateUserDTO.setGender(user.getGender());
-        resCreateUserDTO.setAddress(user.getAddress());
-        return resCreateUserDTO;
+        ResCreateUserDTO res = new ResCreateUserDTO();
+        res.setId(user.getId());
+        res.setEmail(user.getEmail());
+        res.setName(user.getName());
+        res.setAge(user.getAge());
+        res.setCreatedAt(user.getCreatedAt());
+        res.setGender(user.getGender());
+        res.setAddress(user.getAddress());
+        return res;
     }
 
     public ResUpdateUserDTO convertToResUpdateUserDTO(User user) {
@@ -128,12 +131,11 @@ public class UserService {
     }
 
     public void updateUserToken(String token, String email) {
-        User userCurrent = this.handleGetUserByUsername(email);
-        if (userCurrent != null) {
-            userCurrent.setRefreshToken(token);
-            this.userRepository.save(userCurrent);
+        User currentUser = this.handleGetUserByUsername(email);
+        if (currentUser != null) {
+            currentUser.setRefreshToken(token);
+            this.userRepository.save(currentUser);
         }
-
     }
 
     public User getUserByRefreshTokenAndEmail(String token, String email) {
